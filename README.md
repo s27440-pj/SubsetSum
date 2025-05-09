@@ -1,1 +1,2 @@
 Problem sumy podzbioru jest problemem NP-zupełnym. Jego najczęściej spotykana formuła to: mając dany zbiór liczb całkowitych A oraz sumę S należy sprawdzić, czy istnieje podzbiór zbioru A taki, że suma jego elementów jest równa dokładnie S.
+Liczby w tym zbiorze mogą się powtarzać, mogą być dodatnie lub ujemne.
