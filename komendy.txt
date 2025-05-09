@@ -1,0 +1,5 @@
+python main.py --file test.txt --s 10 --algorithm random --iterations 100
+python main.py --file test.txt --s 15 --algorithm hill_climbing --iterations 200
+python main.py --file test.txt --s 20 --algorithm hill_climbing_stochastic --iterations 300
+python main.py --file test.txt --s 25 --algorithm tabu --iterations 500 --tabu_size 10
+python main.py --file test.txt --s 30 --algorithm tabu_returning --iterations 500

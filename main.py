@@ -88,7 +88,7 @@ def hill_climbing_stochastic(full_set, s, max_iterations):
     return subset, cost(subset, full_set, s), max_iterations
 
 
-def tabu_search(full_set, s, max_iterations, tabu_size=100):
+def tabu_search(full_set, s, max_iterations, tabu_size):
     subset = random_subset(full_set)
     # on the lecture we were keeping all global best, but I think we don't need it
     global_best = subset.copy()
@@ -112,8 +112,7 @@ def tabu_search(full_set, s, max_iterations, tabu_size=100):
         best_neighbour = min(neighbours, key=lambda neighbour: cost(neighbour, full_set, s))
         subset = best_neighbour
         tabu_list.append(best_neighbour)
-        if len(tabu_list) > tabu_size:
-            # tabu_list.pop(0) - not better? think it's the same
+        if isinstance(tabu_size, int) and tabu_size > 0:
             tabu_list = tabu_list[-tabu_size:]
         if cost(subset, full_set, s) < cost(global_best, full_set, s):
             global_best = subset.copy()
@@ -122,7 +121,7 @@ def tabu_search(full_set, s, max_iterations, tabu_size=100):
     return global_best, cost(global_best, full_set, s), max_iterations
 
 
-def tabu_search_returning(full_set, s, max_iterations, tabu_size=100):
+def tabu_search_returning(full_set, s, max_iterations, tabu_size):
     subset = random_subset(full_set)
     global_best = subset.copy()
     tabu_list = [subset.copy()]
@@ -148,7 +147,7 @@ def tabu_search_returning(full_set, s, max_iterations, tabu_size=100):
         subset = best_neighbour
         tabu_list.append(best_neighbour)
 
-        if len(tabu_list) > tabu_size:
+        if isinstance(tabu_size, int) and tabu_size > 0:
             tabu_list = tabu_list[-tabu_size:]
         if cost(subset, full_set, s) < cost(global_best, full_set, s):
             global_best = subset.copy()
@@ -206,35 +205,45 @@ def read_set_from_file(file_path):
 
 
 # print(sim_annealing([1, 2, 2, 2, 3, 4], 1, 100))
-print(brute_force([1, 2, 3], -1))
+# print(brute_force([1, 2, 3], -1))
 
-# def main(full_set, s, algorithm, iterations):
-#     if algorithm == "random":
-#         print(random_solution(full_set, s, iterations))
-#     elif algorithm == "hill_climbing":
-#         print(hill_climbing(full_set, s, iterations))
-#     elif algorithm == "tabu":
-#         print(hill_climbing_stochastic(full_set, s, iterations))
-#     elif algorithm == "hill_climbing_stochastic":
-#         print(tabu_search(full_set, s, iterations))
-#
-#
-# if __name__ == '__main__':
-#     parser = argparse.ArgumentParser(description="Subset sum problem solver with metaheuristics.")
-#
-#     group = parser.add_mutually_exclusive_group(required=True)
-#     group.add_argument("--set", nargs="+", type=int, help="The set of numbers provided directly.")
-#     group.add_argument("--file", type=str, help="Path to a file containing the set of numbers.")
-#
-#     parser.add_argument("--s", type=int, help="The target sum.")
-#     parser.add_argument("--algorithm", choices=["random", "hill_climbing", "hill_climbing_stochastic", "tabu"],
-#                         help="Algorithm to use.")
-#     parser.add_argument("--iterations", type=int, help="Maximum iterations in algorithm")
-#
-#     args = parser.parse_args()
-#     if args.file:
-#         input_set = read_set_from_file(args.file)
-#     else:
-#         input_set = args.set
-#
-#     main(input_set, args.s, args.algorithm, args.iterations)
+
+def main(full_set, s, algorithm, iterations, tabu_size=None):
+    if algorithm == "random":
+        print(random_solution(full_set, s, iterations))
+    elif algorithm == "brute_force":
+        print(brute_force(full_set, iterations))
+    elif algorithm == "hill_climbing":
+        print(hill_climbing(full_set, s, iterations))
+    elif algorithm == "hill_climbing_stochastic":
+        print(hill_climbing_stochastic(full_set, s, iterations))
+    elif algorithm == "tabu":
+        print(tabu_search(full_set, s, iterations, tabu_size))
+    elif algorithm == "tabu_returning":
+        print(tabu_search_returning(full_set, s, iterations, tabu_size))
+    elif algorithm == "sim_annealing":
+        print(sim_annealing(full_set, s, iterations))
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Subset sum problem solver with metaheuristics.")
+
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--set", nargs="+", type=int, help="The set of numbers provided directly.")
+    group.add_argument("--file", type=str, help="Path to a file containing the set of numbers.")
+
+    parser.add_argument("--s", type=int, help="The target sum.")
+    parser.add_argument("--algorithm", choices=["random", "brute_force", "hill_climbing", "hill_climbing_stochastic",
+                                                "tabu", "tabu_returning", "sim_annealing"],
+                        help="Algorithm to use.")
+    parser.add_argument("--iterations", type=int, help="Maximum iterations in algorithm")
+    parser.add_argument("--tabu_size", type=int, help="Maximum tabu size - can be none")
+
+    args = parser.parse_args()
+    if args.file:
+        input_set = read_set_from_file(args.file)
+    else:
+        input_set = args.set
+
+    main(input_set, args.s, args.algorithm, args.iterations,
+         args.tabu_size if args.algorithm in ["tabu", "tabu_returning"] else None)
