@@ -41,7 +41,6 @@ def brute_force(full_set, s):
     best_cost = float('inf')
 
     for iteration, subset in enumerate(itertools.product([0, 1], repeat=n)):
-        print("iteration: ", iteration, " subset: ", subset)
         current_cost = cost(subset, full_set, s)
         if current_cost < best_cost:
             best_cost = current_cost
@@ -165,17 +164,18 @@ def temperature(k):
 def neighbor_normal(subset):
     n = len(subset)
     # middle of subset, and n/6 - 99% of index will be between 0 and n, 3 sigma rule
-    index = int(random.gauss(n/2, n/6))
-    # index chosen from gauss can be smaller than 0 and greater than length-1 of subset. This is to prevent it.
-    index = max(0, min(n - 1, index))
+    indexes_number = int(random.gauss(n/2, n/6))
+    # number chosen from gauss can be smaller than 0 and greater than length of subset. This is to prevent it.
+    indexes_number = max(0, min(n, indexes_number))
     neighbor = subset.copy()
-    neighbor[index] = 1 - neighbor[index]
+    indices_to_flip = random.sample(range(len(subset)), indexes_number)
+    for idx in indices_to_flip:
+        neighbor[idx] = 1 - neighbor[idx]
     return neighbor
 
 
 def sim_annealing(full_set, s, max_iterations):
     subset = random_subset(full_set)
-    # remembering the best solution - should it be in annealing?
     best_subset = subset.copy()
 
     for i in range(max_iterations):
@@ -186,7 +186,8 @@ def sim_annealing(full_set, s, max_iterations):
         if cost_neighbour < cost_subset:
             subset = random_neighbour
         else:
-            if random.random() < math.exp(-(cost_neighbour - cost_subset) / temperature(i)):
+            # (0,1)
+            if random.random() < math.exp(-abs(cost_neighbour - cost_subset) / temperature(i)):
                 subset = random_neighbour
 
         if cost(subset, full_set, s) < cost(best_subset, full_set, s):
@@ -212,7 +213,7 @@ def main(full_set, s, algorithm, iterations, tabu_size=None):
     if algorithm == "random":
         print(random_solution(full_set, s, iterations))
     elif algorithm == "brute_force":
-        print(brute_force(full_set, iterations))
+        print(brute_force(full_set, s))
     elif algorithm == "hill_climbing":
         print(hill_climbing(full_set, s, iterations))
     elif algorithm == "hill_climbing_stochastic":
